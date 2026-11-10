@@ -4,7 +4,7 @@ from quality_lab import demo
 
 
 class Command(BaseCommand):
-    help = "Carga los datos de demostración de CampusFlow (solo si la base está vacía)."
+    help = "Carga los datos de demostración de MatriculaVyV (solo si la base está vacía)."
 
     def handle(self, *args, **options):
         if demo.hay_datos_demo():

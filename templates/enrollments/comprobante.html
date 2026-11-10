@@ -9,7 +9,7 @@
 <section class="card">
   <div class="card-body">
     <div class="comprobante-head">
-      <div><span class="kicker">CampusFlow · {{ matricula.periodo.nombre }}</span><h2 style="font-size:1.4rem">{{ matricula.codigo }}</h2></div>
+      <div><span class="kicker">MatriculaVyV · {{ matricula.periodo.nombre }}</span><h2 style="font-size:1.4rem">{{ matricula.codigo }}</h2></div>
       <div>{% if matricula.estado == "activa" %}<span class="badge badge-success">{% icono "check" %} Matrícula activa</span>{% else %}<span class="badge">{{ matricula.get_estado_display }}</span>{% endif %}</div>
     </div>
     <dl class="dl-inline" style="margin-top:1.25rem">

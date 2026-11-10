@@ -1,7 +1,7 @@
 # Guía de exposición — Verificación frente a validación en una app de matrícula estudiantil
 
 **Duración estimada:** 10 minutos, más preguntas.
-**Sistema:** CampusFlow — Sistema de Matrícula Académica (local).
+**Sistema:** MatriculaVyV — Sistema de Matrícula Académica (local).
 
 ---
 
@@ -23,7 +23,7 @@
 
 | Escena | Tiempo | Pregunta que responde |
 |---|---|---|
-| 1. Presentación del sistema | 1:30 | ¿Qué hace CampusFlow? |
+| 1. Presentación del sistema | 1:30 | ¿Qué hace MatriculaVyV? |
 | 2. Verificación | 4:00 | ¿Construimos correctamente el producto? |
 | 3. Validación | 3:30 | ¿Construimos el producto correcto? |
 | 4. Conclusión | 1:00 | ¿Por qué hacen falta las dos? |
@@ -37,7 +37,7 @@
 1. Mostrar **Inicio**: código estudiantil, carrera, semestre, período activo, días que quedan de matrícula y la asignatura que ya tiene (Matemática Discreta, paralelo A).
 2. Abrir **Oferta académica**. Filtrar por nombre (`program`) y luego por carrera.
 
-> **Decir:** «CampusFlow permite consultar asignaturas, horarios, docentes y cupos, matricularse y retirar materias. Los requisitos principales son: no matricular dos veces la misma asignatura, no superar los cupos, no cruzar horarios, matricular solo dentro del plazo y guardar la matrícula de forma completa o no guardarla.»
+> **Decir:** «MatriculaVyV permite consultar asignaturas, horarios, docentes y cupos, matricularse y retirar materias. Los requisitos principales son: no matricular dos veces la misma asignatura, no superar los cupos, no cruzar horarios, matricular solo dentro del plazo y guardar la matrícula de forma completa o no guardarla.»
 
 Señalar que los cupos («2/2 ocupados», «0/30»…) no están escritos en la página: se calculan contando las matrículas guardadas en la base de datos.
 

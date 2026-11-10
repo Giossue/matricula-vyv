@@ -1,5 +1,5 @@
 """
-Configuración de CampusFlow.
+Configuración de MatriculaVyV.
 
 Proyecto pensado para ejecutarse en localhost con fines académicos.
 Los valores sensibles se leen de variables de entorno (ver .env.example).
@@ -35,7 +35,7 @@ def _bool(nombre: str, por_defecto: bool) -> bool:
 
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
-    "solo-desarrollo-local-campusflow-no-usar-en-produccion",
+    "solo-desarrollo-local-matriculavyv-no-usar-en-produccion",
 )
 DEBUG = _bool("DJANGO_DEBUG", True)
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver"]

@@ -1,4 +1,4 @@
-# CampusFlow — Sistema de Matrícula Académica
+# MatriculaVyV — Sistema de Matrícula Académica
 
 Aplicación web local para matrícula universitaria, construida para demostrar en una exposición la diferencia entre **verificación** y **validación** del software.
 
@@ -16,8 +16,8 @@ Requisitos: **Python 3.10 o superior** y `git`.
 **Linux / macOS (bash o zsh):**
 
 ```bash
-git clone https://github.com/Giossue/campusflow.git
-cd campusflow
+git clone https://github.com/Giossue/matricula-vyv.git
+cd matricula-vyv
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -31,8 +31,8 @@ python manage.py runserver
 **Windows (PowerShell o CMD):** usa directamente el Python del entorno. No hace falta activarlo, así que no aparece el error «la ejecución de scripts está deshabilitada».
 
 ```powershell
-git clone https://github.com/Giossue/campusflow.git
-cd campusflow
+git clone https://github.com/Giossue/matricula-vyv.git
+cd matricula-vyv
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
 .venv\Scripts\python manage.py migrate

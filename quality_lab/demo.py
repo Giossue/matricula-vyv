@@ -132,7 +132,7 @@ def cargar_datos_demo(hoy=None) -> dict[str, int]:
     docentes = [
         Docente.objects.create(
             nombre=n, apellido=a,
-            correo=f"{n.lower()}.{a.lower().replace('í', 'i').replace('á', 'a')}@docentes.campusflow.test",
+            correo=f"{n.lower()}.{a.lower().replace('í', 'i').replace('á', 'a')}@docentes.matriculavyv.test",
         )
         for n, a in DOCENTES
     ]
@@ -173,12 +173,12 @@ def cargar_datos_demo(hoy=None) -> dict[str, int]:
     Horario.objects.create(seccion=historica, dia_semana=LU, hora_inicio=_h("07:00"), hora_fin=_h("09:00"))
 
     admin = Usuario.objects.create_superuser(
-        "admin", "admin@campusflow.test", CLAVE_ADMIN, nombre="Laura", apellido="Benítez",
+        "admin", "admin@matriculavyv.test", CLAVE_ADMIN, nombre="Laura", apellido="Benítez",
     )
     estudiantes = {}
     for usuario, nombre, apellido, codigo, carrera, semestre_actual in ESTUDIANTES:
         u = Usuario.objects.create_user(
-            usuario, f"{usuario}@estudiantes.campusflow.test", CLAVE_ESTUDIANTE, nombre=nombre, apellido=apellido,
+            usuario, f"{usuario}@estudiantes.matriculavyv.test", CLAVE_ESTUDIANTE, nombre=nombre, apellido=apellido,
         )
         estudiantes[usuario] = Estudiante.objects.create(
             usuario=u, codigo_estudiantil=codigo, carrera=carreras[carrera], semestre_actual=semestre_actual,

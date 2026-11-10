@@ -1,8 +1,11 @@
+import importlib
 import io
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
@@ -84,6 +87,52 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(por_nombre["test_ok"]["obtenido"], "todo bien")
         self.assertEqual(por_nombre["test_falla"]["estado"], "fallido")
         self.assertIn("AssertionError", por_nombre["test_falla"]["detalle"])
+
+
+class EjecucionMultiplataformaTests(TestCase):
+    """La ejecución de pruebas desde el laboratorio debe funcionar en Linux, macOS y Windows."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        ajuste = override_settings(CAMPUSFLOW_REPORTES_DIR=Path(self.tmp.name))
+        ajuste.enable()
+        self.addCleanup(ajuste.disable)
+
+    def test_el_modulo_se_importa_sin_fcntl(self):
+        # En Windows no existe fcntl; antes la importación fallaba y el servidor no arrancaba.
+        self.addCleanup(importlib.reload, verificacion)
+        with mock.patch.dict(sys.modules, {"fcntl": None, "msvcrt": mock.MagicMock()}):
+            modulo = importlib.reload(verificacion)
+            self.assertIsNone(modulo.fcntl)
+
+    def test_segunda_ejecucion_simultanea_se_rechaza(self):
+        with open(Path(self.tmp.name) / ".ejecucion.lock", "a") as otro:
+            self.assertTrue(verificacion._tomar_candado(otro))
+            with mock.patch.object(verificacion.subprocess, "run") as run:
+                with self.assertRaises(verificacion.EjecucionEnCurso):
+                    verificacion.ejecutar_pruebas(["quality_lab"])
+            run.assert_not_called()
+
+    def test_candado_en_windows_ocupado_se_rechaza(self):
+        msvcrt = mock.MagicMock(LK_NBLCK=2, LK_UNLCK=0)
+        msvcrt.locking.side_effect = OSError(36, "Resource deadlock avoided")
+        with mock.patch.object(verificacion, "fcntl", None), \
+                mock.patch.object(verificacion, "msvcrt", msvcrt, create=True):
+            with self.assertRaises(verificacion.EjecucionEnCurso):
+                verificacion.ejecutar_pruebas(["quality_lab"])
+
+    def test_salida_del_subproceso_en_utf8(self):
+        # En Windows la consola usa cp1252: se fuerza UTF-8 para no romper con tildes o símbolos.
+        resultado = mock.Mock(returncode=0, stdout="Matrícula ✓", stderr="")
+        with mock.patch.object(verificacion.subprocess, "run", return_value=resultado) as run:
+            reporte = verificacion.ejecutar_pruebas(["quality_lab"])
+        kwargs = run.call_args.kwargs
+        self.assertEqual(kwargs["encoding"], "utf-8")
+        self.assertEqual(kwargs["errors"], "replace")
+        self.assertEqual(kwargs["env"]["PYTHONIOENCODING"], "utf-8")
+        self.assertEqual(kwargs["env"]["PYTHONUTF8"], "1")
+        self.assertIn("Matrícula ✓", reporte["salida"])
 
 
 class ValidacionTests(TestCase):

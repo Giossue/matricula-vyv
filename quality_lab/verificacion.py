@@ -8,7 +8,6 @@
 
 from __future__ import annotations
 
-import fcntl
 import json
 import os
 import subprocess
@@ -22,12 +21,41 @@ from django.utils import timezone
 
 from .casos import CASOS
 
+try:  # Linux y macOS
+    import fcntl
+except ImportError:  # Windows: no existe fcntl, se usa msvcrt
+    fcntl = None
+    import msvcrt
+
 ARCHIVO_REPORTE = "reporte_verificacion.json"
 TIEMPO_MAXIMO_S = 300
 
 
 class EjecucionEnCurso(Exception):
     pass
+
+
+def _tomar_candado(archivo) -> bool:
+    """Bloqueo exclusivo y no bloqueante del archivo; False si otro proceso lo tiene."""
+    try:
+        if fcntl is not None:
+            fcntl.flock(archivo, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        else:
+            archivo.seek(0)
+            msvcrt.locking(archivo.fileno(), msvcrt.LK_NBLCK, 1)
+    except OSError:
+        return False
+    return True
+
+
+def _soltar_candado(archivo) -> None:
+    # Con fcntl el bloqueo se libera al cerrar el archivo; en Windows se libera explícitamente.
+    if fcntl is None:
+        try:
+            archivo.seek(0)
+            msvcrt.locking(archivo.fileno(), msvcrt.LK_UNLCK, 1)
+        except OSError:
+            pass
 
 
 def _dir_reportes() -> Path:
@@ -54,12 +82,11 @@ def conteo_bd_principal() -> dict[str, int]:
 def ejecutar_pruebas(etiquetas: list[str] | None = None) -> dict:
     """Corre `manage.py test` con el runner del laboratorio y devuelve el reporte."""
     directorio = _dir_reportes()
-    candado = open(directorio / ".ejecucion.lock", "w")
+    candado = open(directorio / ".ejecucion.lock", "a")
+    tomado = _tomar_candado(candado)
     try:
-        try:
-            fcntl.flock(candado, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as exc:
-            raise EjecucionEnCurso("Ya hay una ejecución de pruebas en curso.") from exc
+        if not tomado:
+            raise EjecucionEnCurso("Ya hay una ejecución de pruebas en curso.")
 
         antes = conteo_bd_principal()
         with tempfile.NamedTemporaryFile(dir=directorio, suffix=".json", delete=False) as tmp:
@@ -68,16 +95,23 @@ def ejecutar_pruebas(etiquetas: list[str] | None = None) -> dict:
             sys.executable, "manage.py", "test", *(etiquetas or []),
             "--testrunner=quality_lab.runner.VyVRunner", "--noinput", "-v", "2",
         ]
-        entorno = {**os.environ, "CAMPUSFLOW_REPORTE_VYV": str(ruta_tmp), "PYTHONUNBUFFERED": "1"}
+        # UTF-8 forzado: en Windows la salida por tubería usaría cp1252 y fallaría con tildes.
+        entorno = {
+            **os.environ, "CAMPUSFLOW_REPORTE_VYV": str(ruta_tmp), "PYTHONUNBUFFERED": "1",
+            "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1",
+        }
         inicio = time.perf_counter()
         try:
             proceso = subprocess.run(
-                comando, cwd=settings.BASE_DIR, env=entorno, capture_output=True, text=True,
-                timeout=TIEMPO_MAXIMO_S,
+                comando, cwd=settings.BASE_DIR, env=entorno, capture_output=True,
+                encoding="utf-8", errors="replace", timeout=TIEMPO_MAXIMO_S,
             )
             codigo, salida = proceso.returncode, (proceso.stdout + proceso.stderr)
         except subprocess.TimeoutExpired as exc:
-            codigo, salida = -1, f"Tiempo máximo superado ({TIEMPO_MAXIMO_S} s).\n{exc.stdout or ''}"
+            parcial = exc.stdout or ""
+            if isinstance(parcial, bytes):  # TimeoutExpired entrega bytes aunque se pida texto
+                parcial = parcial.decode("utf-8", errors="replace")
+            codigo, salida = -1, f"Tiempo máximo superado ({TIEMPO_MAXIMO_S} s).\n{parcial}"
         duracion = round(time.perf_counter() - inicio, 2)
 
         try:
@@ -105,6 +139,8 @@ def ejecutar_pruebas(etiquetas: list[str] | None = None) -> dict:
         ruta_reporte().write_text(json.dumps(reporte, ensure_ascii=False, indent=2), encoding="utf-8")
         return reporte
     finally:
+        if tomado:
+            _soltar_candado(candado)
         candado.close()
 
 

@@ -9,6 +9,53 @@ Todo funciona en `localhost`, sin internet una vez instaladas las dependencias, 
 
 ---
 
+## Inicio rápido (copiar y pegar)
+
+Requisitos: **Python 3.12 o superior** y `git`.
+
+**Linux / macOS (bash o zsh):**
+
+```bash
+git clone https://github.com/Giossue/campusflow.git
+cd campusflow
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py cargar_demo
+python manage.py runserver
+```
+
+**Linux (fish):** igual que arriba, pero activa el entorno con `source .venv/bin/activate.fish`.
+
+**Windows (PowerShell):**
+
+```powershell
+git clone https://github.com/Giossue/campusflow.git
+cd campusflow
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py cargar_demo
+python manage.py runserver
+```
+
+Si PowerShell no permite ejecutar el script de activación, ejecuta antes `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+
+Abre **http://127.0.0.1:8000** y entra con:
+
+| Usuario | Contraseña | Rol |
+|---|---|---|
+| `admin` | `CampusAdmin2026!` | Administrador |
+| `ana.torres` | `Estudiante2026!` | Estudiante |
+
+Para usar el sistema otra vez más adelante solo hace falta entrar en la carpeta, activar el entorno (`source .venv/bin/activate`) y ejecutar `python manage.py runserver`. Para detener el servidor, pulsa `Ctrl+C`.
+
+En [Cómo usar el sistema](#cómo-usar-el-sistema) está qué hacer con cada cuenta. Abajo está el mismo proceso explicado paso a paso.
+
+---
+
 ## 1. Requisitos del sistema
 
 - Python **3.12 o superior** (probado con Python 3.14 y Django 6.0.10).
@@ -116,6 +163,71 @@ python manage.py reset_demo --si   # sin pregunta
 - Borra y vuelve a crear asignaturas, períodos, secciones, docentes, matrículas y las cuentas demo, y deja la experiencia en Versión A.
 - **Conserva** las evaluaciones de participantes, que son evidencia real, y las cuentas administrativas creadas fuera de la demo. Para borrar también las evaluaciones, agrega `--incluir-evaluaciones`.
 - Protecciones: se niega a ejecutarse si `DEBUG` está desactivado, si `CAMPUSFLOW_ENTORNO` no es `local` o si la base de datos no es un archivo SQLite dentro de la carpeta del proyecto. Sin terminal interactiva exige `--si`.
+
+---
+
+## Cómo usar el sistema
+
+Al iniciar sesión, cada usuario llega a su propio panel según su rol. La navegación está en el menú lateral; en el móvil se abre con el botón de menú.
+
+### Como estudiante (por ejemplo `ana.torres`)
+
+- **Inicio**: código estudiantil, carrera, semestre, período activo, días que quedan para matricularse y asignaturas inscritas.
+- **Oferta académica**: todas las secciones del período con su horario, docente y cupos. Se puede filtrar por nombre y por carrera.
+- **Matricularme**:
+  1. Marca un paralelo de cada asignatura que quieras.
+  2. Pulsa **Confirmar matrícula**.
+  3. Si la selección cumple todas las reglas, se abre el **comprobante**.
+  4. Si hay cupo agotado, cruce de horario o una asignatura repetida, el sistema explica el motivo y no guarda nada.
+- **Mis asignaturas**: lo inscrito en el período, con un botón **Retirar** en cada materia.
+  Al retirarla se libera el cupo.
+- **Evaluar la experiencia**: formulario de opinión sobre la versión de matrícula que se está usando.
+
+Selecciones para probar con `ana.torres`:
+
+| Qué quieres ver | Qué marcar |
+|---|---|
+| Matrícula aceptada | Fundamentos de Programación **A** + Verificación y Validación **A** |
+| Cupo agotado | Base de Datos I **A** |
+| Cruce de horario | Programación Orientada a Objetos **A** junto con Fundamentos de Programación **A** |
+| Asignatura repetida | Matemática Discreta **B** (Ana ya tiene la A) |
+
+Para ver los dos últimos rechazos desde el servidor, desactiva primero la validación del navegador en la barra de demostración (ver más abajo). Después de probar, `python manage.py reset_demo --si` deja todo como al principio.
+
+### Como administrador (`admin`)
+
+- **Panel**: métricas generales del período: estudiantes, matrículas, secciones llenas…
+- **Asignaturas, Períodos, Secciones y horarios, Docentes**: crear, editar y desactivar. En cada sección se definen el paralelo, el docente, la capacidad y uno o más bloques de horario.
+- **Estudiantes, Matrículas y Disponibilidad de cupos**: consulta de solo lectura. En **Matrículas**, el botón **Ver** abre el detalle de cada una.
+- **Laboratorio VyV**:
+  - **Verificación**:
+    - Pulsa **Solo V01–V09** (unos 3 s) o **Suite completa** (unos 25 s).
+    - Las pruebas automatizadas se ejecutan de verdad, sobre una base de datos temporal.
+    - Cada caso muestra su objetivo, los datos usados, el resultado esperado, el resultado obtenido, el estado y una explicación.
+    - El recuadro de aislamiento confirma que `db.sqlite3` no cambió.
+  - **Validación**: muestra la necesidad investigada, la comparación entre la Versión A y la B, el selector de versión y el resumen de las evaluaciones de los participantes.
+
+### Barra «Demostración VyV»
+
+Aparece arriba en la página **Matricularme**:
+
+- **Versión A / Versión B**: cambia la experiencia de matrícula para todos los usuarios.
+  - **A** es una lista con los horarios en texto.
+  - **B** agrega un calendario semanal en vivo, avisos de cruce antes de marcar, un resumen de créditos y un paso **Revisar y confirmar** en el que el servidor comprueba la selección antes de guardar.
+- **Validación del navegador: activa / desactivada**: al desactivarla, el navegador deja de bloquear las selecciones inválidas, y así se ve que el servidor también las rechaza.
+- **Evaluar esta versión**: abre el formulario de opinión, que se guarda en la base de datos y aparece en el Laboratorio de Validación.
+
+### Problemas frecuentes
+
+| Problema | Solución |
+|---|---|
+| `python` no se encuentra o la versión es menor que 3.12 | Usa `python3`, o instala Python 3.12 o superior desde python.org. |
+| «La matrícula no está habilitada» | El período demo dura 30 días desde la carga. Ejecuta `python manage.py reset_demo --si`. |
+| `cargar_demo` no carga nada | La base ya tenía datos. Para empezar de cero, ejecuta `python manage.py reset_demo --si`. |
+| El puerto 8000 está ocupado | `python manage.py runserver 8001` y abre http://127.0.0.1:8001 |
+| No aparece la barra de demostración | Revisa que `.env` no tenga `CAMPUSFLOW_MODO_DEMO=false`. |
+
+El guion completo de la exposición (unos 10 minutos en 4 escenas) está en [`GUIA_EXPOSICION.md`](GUIA_EXPOSICION.md).
 
 ---
 

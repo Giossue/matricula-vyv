@@ -11,7 +11,7 @@ Todo funciona en `localhost`, sin internet una vez instaladas las dependencias, 
 
 ## Inicio rápido (copiar y pegar)
 
-Requisitos: **Python 3.12 o superior** y `git`.
+Requisitos: **Python 3.10 o superior** y `git`.
 
 **Linux / macOS (bash o zsh):**
 
@@ -28,20 +28,19 @@ python manage.py runserver
 
 **Linux (fish):** igual que arriba, pero activa el entorno con `source .venv/bin/activate.fish`.
 
-**Windows (PowerShell):**
+**Windows (PowerShell o CMD):** usa directamente el Python del entorno. No hace falta activarlo, así que no aparece el error «la ejecución de scripts está deshabilitada».
 
 ```powershell
 git clone https://github.com/Giossue/campusflow.git
 cd campusflow
 python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py cargar_demo
-python manage.py runserver
+.venv\Scripts\python -m pip install -r requirements.txt
+.venv\Scripts\python manage.py migrate
+.venv\Scripts\python manage.py cargar_demo
+.venv\Scripts\python manage.py runserver
 ```
 
-Si PowerShell no permite ejecutar el script de activación, ejecuta antes `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+Si `python` no existe en Windows, prueba con `py` en la tercera línea (`py -m venv .venv`).
 
 Abre **http://127.0.0.1:8000** y entra con:
 
@@ -50,7 +49,7 @@ Abre **http://127.0.0.1:8000** y entra con:
 | `admin` | `CampusAdmin2026!` | Administrador |
 | `ana.torres` | `Estudiante2026!` | Estudiante |
 
-Para usar el sistema otra vez más adelante solo hace falta entrar en la carpeta, activar el entorno (`source .venv/bin/activate`) y ejecutar `python manage.py runserver`. Para detener el servidor, pulsa `Ctrl+C`.
+Para usar el sistema otra vez más adelante solo hace falta entrar en la carpeta y ejecutar el servidor: `.venv/bin/python manage.py runserver` en Linux/macOS o `.venv\Scripts\python manage.py runserver` en Windows. Para detener el servidor, pulsa `Ctrl+C`.
 
 En [Cómo usar el sistema](#cómo-usar-el-sistema) está qué hacer con cada cuenta. Abajo está el mismo proceso explicado paso a paso.
 
@@ -58,7 +57,7 @@ En [Cómo usar el sistema](#cómo-usar-el-sistema) está qué hacer con cada cue
 
 ## 1. Requisitos del sistema
 
-- Python **3.12 o superior** (probado con Python 3.14 y Django 6.0.10).
+- Python **3.10 o superior**. Usa Django 5.2 LTS y está probado con Python 3.10, 3.11 y 3.14.
 - `pip` y el módulo `venv` (incluidos en Python).
 - Un navegador moderno (Chrome, Firefox, Edge).
 
@@ -77,9 +76,11 @@ Activarlo:
 source .venv/bin/activate
 # Linux (fish)
 source .venv/bin/activate.fish
-# Windows (PowerShell)
-.venv\Scripts\Activate.ps1
+# Windows (CMD)
+.venv\Scripts\activate.bat
 ```
+
+En Windows PowerShell, el script `Activate.ps1` puede estar bloqueado. En ese caso no actives el entorno: escribe `.venv\Scripts\python` en lugar de `python` en todos los comandos (por ejemplo, `.venv\Scripts\python manage.py migrate`).
 
 ## 3. Instalar dependencias
 
@@ -221,7 +222,9 @@ Aparece arriba en la página **Matricularme**:
 
 | Problema | Solución |
 |---|---|
-| `python` no se encuentra o la versión es menor que 3.12 | Usa `python3`, o instala Python 3.12 o superior desde python.org. |
+| `python` no se encuentra o la versión es menor que 3.10 | Usa `python3` (Linux/macOS) o `py` (Windows), o instala una versión reciente desde python.org. |
+| Windows: «la ejecución de scripts está deshabilitada» | No actives el entorno: usa `.venv\Scripts\python` en lugar de `python`, como en el Inicio rápido. |
+| `No module named 'django'` | Las dependencias no se instalaron en el entorno. Repite `.venv\Scripts\python -m pip install -r requirements.txt` (Windows) o `.venv/bin/python -m pip install -r requirements.txt` (Linux/macOS). |
 | «La matrícula no está habilitada» | El período demo dura 30 días desde la carga. Ejecuta `python manage.py reset_demo --si`. |
 | `cargar_demo` no carga nada | La base ya tenía datos. Para empezar de cero, ejecuta `python manage.py reset_demo --si`. |
 | El puerto 8000 está ocupado | `python manage.py runserver 8001` y abre http://127.0.0.1:8001 |

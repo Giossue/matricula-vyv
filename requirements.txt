@@ -1,3 +1,3 @@
-Django==6.0.10
-asgiref==3.13.0
-sqlparse==0.6.1
+# Django 5.2 LTS: funciona con Python 3.10, 3.11, 3.12, 3.13 y 3.14.
+# pip instala automáticamente sus dependencias (asgiref y sqlparse).
+Django==5.2.19

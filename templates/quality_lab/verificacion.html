@@ -1,0 +1,80 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Laboratorio de Verificación{% endblock %}
+{% block kicker %}Laboratorio de Calidad — VyV{% endblock %}
+{% block encabezado %}Verificación: ¿construimos correctamente el producto?{% endblock %}
+{% block acciones %}<a class="btn btn-secondary" href="{% url 'quality_lab:laboratorio' %}">{% icono "volver" %} Laboratorio</a>{% endblock %}
+{% block contenido %}
+<section class="card" style="margin-bottom:1.25rem">
+  <div class="card-body" style="display:flex;gap:1.25rem;flex-wrap:wrap;align-items:center">
+    <div style="flex:1;min-width:260px">
+      <h2>Ejecutar pruebas automatizadas</h2>
+      <p class="muted" style="margin:.25rem 0 0">Lanza <code>python manage.py test</code> en un proceso aparte. Django crea una base de datos de pruebas temporal; la base principal de la demostración no se modifica.</p>
+    </div>
+    <form method="post" action="{% url 'quality_lab:ejecutar' %}" data-ejecutar style="display:flex;gap:.5rem;flex-wrap:wrap">
+      {% csrf_token %}
+      <button class="btn btn-secondary" name="alcance" value="casos" type="submit">{% icono "play" %} Solo V01–V09</button>
+      <button class="btn btn-primary" name="alcance" value="completa" type="submit">{% icono "play" %} Suite completa</button>
+    </form>
+  </div>
+</section>
+
+{% if reporte %}
+<div class="metrics">
+  <div class="card metric"><span>Casos V01–V09</span><strong style="color:{% if casos_aprobados == 9 %}var(--green-700){% else %}var(--red-700){% endif %}">{{ casos_aprobados }}/9</strong><small>aprobados en la última ejecución</small></div>
+  <div class="card metric"><span>Pruebas ejecutadas</span><strong>{{ reporte.total }}</strong><small>{{ reporte.aprobadas }} aprobadas · {{ reporte.fallidas }} fallidas</small></div>
+  <div class="card metric"><span>Duración</span><strong>{{ reporte.duracion_s }} s</strong><small>código de salida {{ reporte.codigo_salida }}</small></div>
+  <div class="card metric"><span>Ejecutado</span><strong style="font-size:1.15rem">{{ fecha_ejecucion|date:"d/m/Y H:i:s"|default:"—" }}</strong><small>BD de pruebas: {{ bd_pruebas }}</small></div>
+</div>
+<div class="alert alert-info" style="margin-bottom:1.25rem">{% icono "bd" %}
+  <div><strong>Aislamiento de la base de datos principal</strong>
+  Registros en <code>db.sqlite3</code> antes → después de ejecutar:
+  usuarios {{ reporte.bd_principal_antes.usuarios }} → {{ reporte.bd_principal_despues.usuarios }},
+  matrículas {{ reporte.bd_principal_antes.matriculas }} → {{ reporte.bd_principal_despues.matriculas }},
+  detalles {{ reporte.bd_principal_antes.detalles_matricula }} → {{ reporte.bd_principal_despues.detalles_matricula }}.</div>
+</div>
+{% else %}
+<div class="alert alert-warning" style="margin-bottom:1.25rem">{% icono "alerta" %}<div><strong>Todavía no hay resultados.</strong> Los casos aparecen como «sin ejecutar» hasta que pulses un botón de ejecución. Ningún estado se muestra aprobado de antemano.</div></div>
+{% endif %}
+
+<h2 style="margin-bottom:.75rem">Casos de verificación</h2>
+{% for c in casos %}
+<details class="caso {{ c.estado }}" {% if c.estado == "fallido" or c.estado == "error" %}open{% endif %}>
+  <summary>
+    <span class="caso-id">{{ c.id }}</span>
+    <span><strong>{{ c.titulo }}</strong><br><small>{{ c.objetivo }}</small></span>
+    {% if c.estado == "aprobado" %}<span class="badge badge-success">{% icono "check" %} Aprobado</span>
+    {% elif c.estado == "fallido" or c.estado == "error" %}<span class="badge badge-danger">{% icono "x" %} Fallido</span>
+    {% else %}<span class="badge">Sin ejecutar</span>{% endif %}
+  </summary>
+  <dl>
+    <dt>Objetivo</dt><dd>{{ c.objetivo }}</dd>
+    <dt>Datos utilizados</dt><dd>{{ c.datos_reales|default:c.datos }}</dd>
+    <dt>Resultado esperado</dt><dd>{{ c.esperado }}</dd>
+    <dt>Resultado obtenido</dt><dd><div class="obtenido">{% if c.obtenido %}{{ c.obtenido }}{% elif c.estado == "sin_ejecutar" %}<span class="muted">Se mostrará después de ejecutar las pruebas.</span>{% else %}<span class="muted">La prueba no informó un resultado.</span>{% endif %}</div></dd>
+    <dt>Explicación</dt><dd>{{ c.explicacion }}</dd>
+    {% if c.prueba %}<dt>Prueba automatizada</dt><dd><code>{{ c.prueba }}</code>{% if c.duracion_ms is not None %} · {{ c.duracion_ms }} ms{% endif %}</dd>{% endif %}
+    {% if c.detalle %}<dt>Detalle del fallo</dt><dd><pre class="salida">{{ c.detalle }}</pre></dd>{% endif %}
+  </dl>
+</details>
+{% endfor %}
+
+{% if otras %}
+<section class="card" style="margin-top:1.5rem">
+  <div class="card-header"><div><h2>Otras pruebas unitarias y de integración</h2><p>Modelos, reglas, permisos y vistas. Resultado de la misma ejecución.</p></div></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Prueba</th><th>Descripción</th><th class="num">ms</th><th>Estado</th></tr></thead>
+    <tbody>{% for r in otras %}
+      <tr><td class="mono" style="font-size:.78rem">{{ r.id }}</td><td>{{ r.descripcion }}</td><td class="num">{{ r.duracion_ms }}</td>
+        <td>{% if r.estado == "aprobado" %}<span class="badge badge-success">Aprobada</span>{% elif r.estado == "omitido" %}<span class="badge">Omitida</span>{% else %}<span class="badge badge-danger">Fallida</span>{% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+</section>
+{% endif %}
+
+{% if reporte %}
+<details class="card" style="margin-top:1.25rem">
+  <summary class="card-body" style="cursor:pointer"><strong>Salida completa del comando</strong> <small class="mono">{{ reporte.comando }}</small></summary>
+  <div class="card-body" style="padding-top:0"><pre class="salida">{{ reporte.salida }}</pre></div>
+</details>
+{% endif %}
+{% endblock %}

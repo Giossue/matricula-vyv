@@ -1,0 +1,41 @@
+{% load ui %}
+<aside class="sidebar" data-sidebar>
+  <a class="brand" href="{% url 'inicio' %}">
+    <span class="brand-mark">{% icono "logo" %}</span>
+    <span><strong>CampusFlow</strong><small>Matrícula académica</small></span>
+  </a>
+  <nav class="nav" aria-label="Navegación principal">
+    {% if user.es_administrador %}
+      <span class="nav-group">Gestión</span>
+      <a href="{% url 'academics:panel' %}" class="{% if seccion_activa == 'panel' %}active{% endif %}">{% icono "inicio" %} Panel</a>
+      <a href="{% url 'academics:asignaturas' %}" class="{% if seccion_activa == 'asignaturas' %}active{% endif %}">{% icono "libro" %} Asignaturas</a>
+      <a href="{% url 'academics:periodos' %}" class="{% if seccion_activa == 'periodos' %}active{% endif %}">{% icono "calendario" %} Períodos</a>
+      <a href="{% url 'academics:secciones' %}" class="{% if seccion_activa == 'secciones' %}active{% endif %}">{% icono "capas" %} Secciones y horarios</a>
+      <a href="{% url 'academics:docentes' %}" class="{% if seccion_activa == 'docentes' %}active{% endif %}">{% icono "usuario" %} Docentes</a>
+      <a href="{% url 'academics:cupos' %}" class="{% if seccion_activa == 'cupos' %}active{% endif %}">{% icono "barras" %} Disponibilidad de cupos</a>
+      <span class="nav-group">Consultas</span>
+      <a href="{% url 'admin_estudiantes' %}" class="{% if seccion_activa == 'estudiantes' %}active{% endif %}">{% icono "usuarios" %} Estudiantes</a>
+      <a href="{% url 'matriculas_admin:admin_matriculas' %}" class="{% if seccion_activa == 'matriculas' %}active{% endif %}">{% icono "portapapeles" %} Matrículas</a>
+      <span class="nav-group">Calidad</span>
+      <a href="{% url 'quality_lab:laboratorio' %}" class="nav-lab {% if seccion_activa == 'laboratorio' %}active{% endif %}">{% icono "matraz" %} Laboratorio VyV</a>
+    {% else %}
+      <span class="nav-group">Mi matrícula</span>
+      <a href="{% url 'enrollments:panel' %}" class="{% if seccion_activa == 'panel' %}active{% endif %}">{% icono "inicio" %} Inicio</a>
+      <a href="{% url 'enrollments:oferta' %}" class="{% if seccion_activa == 'oferta' %}active{% endif %}">{% icono "libro" %} Oferta académica</a>
+      <a href="{% url 'enrollments:matricula' %}" class="{% if seccion_activa == 'matricula' %}active{% endif %}">{% icono "portapapeles" %} Matricularme</a>
+      <a href="{% url 'enrollments:mis_asignaturas' %}" class="{% if seccion_activa == 'mis_asignaturas' %}active{% endif %}">{% icono "calendario" %} Mis asignaturas</a>
+      {% if MODO_DEMO %}
+      <span class="nav-group">Demostración</span>
+      <a href="{% url 'evaluar' %}" class="{% if seccion_activa == 'evaluar' %}active{% endif %}">{% icono "mensaje" %} Evaluar la experiencia</a>
+      {% endif %}
+    {% endif %}
+  </nav>
+  <div class="sidebar-user">
+    <span class="avatar">{{ user.iniciales }}</span>
+    <span class="sidebar-user-info"><strong>{{ user.nombre_completo }}</strong><small>{{ user.get_rol_display }}</small></span>
+    <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+      <button class="btn-icon" type="submit" title="Cerrar sesión" aria-label="Cerrar sesión">{% icono "salir" %}</button>
+    </form>
+  </div>
+</aside>
+<div class="sidebar-backdrop" data-menu-toggle></div>

@@ -1,0 +1,65 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Laboratorio de Validación{% endblock %}
+{% block kicker %}Laboratorio de Calidad — VyV{% endblock %}
+{% block encabezado %}Validación: ¿construimos el producto correcto?{% endblock %}
+{% block acciones %}<a class="btn btn-secondary" href="{% url 'quality_lab:laboratorio' %}">{% icono "volver" %} Laboratorio</a>{% endblock %}
+{% block contenido %}
+{% include "includes/barra_demo.html" %}
+<section class="card" style="margin-bottom:1.25rem">
+  <div class="card-header"><div><h2>Necesidad investigada</h2><p>Hallazgo que motiva la comparación.</p></div></div>
+  <div class="card-body">
+    <p><strong>«Antes de confirmar, necesito ver cómo queda mi semana.»</strong> La Versión A cumple todas las reglas de matrícula (las pruebas de verificación lo demuestran), pero el estudiante solo ve horarios como texto, asignatura por asignatura. Para organizar su semana tiene que anotar los bloques aparte, y descubre un cruce recién cuando el sistema rechaza la confirmación.</p>
+    <p class="nota-metodo" style="margin:0">Esta es una limitación deliberada de la experiencia para la demostración, no un error de programación: el software funciona, pero puede no responder a lo que el estudiante necesita.</p>
+  </div>
+</section>
+
+<div class="comparacion" style="margin-bottom:1.25rem">
+  <section class="card">
+    <div class="card-header"><div><h2>Versión A</h2><p>Producto inicial</p></div>{% if version == "A" %}<span class="badge badge-info">Activa en la demo</span>{% endif %}</div>
+    <div class="card-body"><ul>
+      <li>Lista de asignaturas y paralelos con horario en texto.</li>
+      <li>Selección con casillas y botón «Confirmar matrícula».</li>
+      <li>Los cruces se informan después de enviar.</li>
+      <li>Consulta de materias matriculadas en lista.</li>
+    </ul></div>
+  </section>
+  <section class="card">
+    <div class="card-header"><div><h2>Versión B</h2><p>Propuesta tras la retroalimentación</p></div>{% if version == "B" %}<span class="badge badge-info">Activa en la demo</span>{% endif %}</div>
+    <div class="card-body"><ul>
+      <li>Calendario semanal en vivo antes de confirmar.</li>
+      <li>Avisos de cruce comprensibles mientras se elige.</li>
+      <li>Resumen de materias y créditos seleccionados.</li>
+      <li>Paso de revisión que consulta al backend antes de guardar.</li>
+    </ul></div>
+  </section>
+</div>
+<p class="nota-metodo" style="margin-bottom:1.25rem">Ambas versiones usan los mismos datos y el mismo servicio <code>enrollments.services.confirmar_matricula</code>. Solo cambia la interfaz. Para probarlas, inicia sesión como estudiante (en otra ventana o navegador) y abre «Matricularme».</p>
+
+<section class="card" style="margin-bottom:1.25rem">
+  <div class="card-header">
+    <div><h2>Evaluación de participantes</h2><p>Escala de 1 (muy en desacuerdo) a 5 (muy de acuerdo).</p></div>
+    <a class="btn btn-secondary btn-sm" href="{% url 'evaluar' %}">{% icono "mensaje" %} Registrar evaluación</a>
+  </div>
+  <div class="alert alert-warning" style="margin:1rem 1.25rem 0">{% icono "info" %}
+    <div><strong>Estas respuestas son opiniones de participantes.</strong> El sistema las guarda y promedia, pero no concluye por sí mismo si una versión está validada: esa conclusión la elabora el equipo analizando las respuestas y los comentarios.</div></div>
+  <div class="table-wrap"><table class="table" style="margin-top:1rem">
+    <thead><tr><th>Versión</th><th class="num">Respuestas</th><th class="num">Fácil seleccionar</th><th class="num">Comprendió horarios</th><th class="num">Información suficiente</th><th>Estado de la validación</th></tr></thead>
+    <tbody>{% for clave, r in resumen.items %}
+      <tr><td><strong>{{ r.etiqueta }}</strong></td><td class="num">{{ r.n }}</td>
+        <td class="num estrellas">{{ r.facilidad|floatformat:1|default:"—" }}</td><td class="num estrellas">{{ r.horarios|floatformat:1|default:"—" }}</td><td class="num estrellas">{{ r.informacion|floatformat:1|default:"—" }}</td>
+        <td>{% if r.n == 0 %}<span class="badge">Pendiente: sin evaluaciones de usuarios</span>{% else %}<span class="badge badge-warning">En evaluación ({{ r.n }} participante{{ r.n|pluralize }}) · requiere análisis del equipo</span>{% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+</section>
+
+<section class="card">
+  <div class="card-header"><div><h2>Respuestas registradas</h2><p>Últimas 50, con los comentarios de mejora.</p></div></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Fecha</th><th>Versión</th><th>Participante</th><th class="num">P1</th><th class="num">P2</th><th class="num">P3</th><th>¿Qué mejorarías?</th></tr></thead>
+    <tbody>{% for e in evaluaciones %}
+      <tr><td class="muted">{{ e.fecha_registro|date:"d/m/Y H:i" }}</td><td><span class="badge badge-info">{{ e.version }}</span></td><td>{{ e.participante|default:"Anónimo" }}</td>
+        <td class="num">{{ e.facilidad_seleccion }}</td><td class="num">{{ e.comprension_horarios }}</td><td class="num">{{ e.informacion_suficiente }}</td><td>{{ e.mejoras|default:"—" }}</td></tr>
+    {% empty %}<tr><td colspan="7" class="empty">Aún no hay evaluaciones. Pide a un compañero que pruebe una versión y complete el formulario.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

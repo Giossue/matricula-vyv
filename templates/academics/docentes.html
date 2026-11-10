@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Docentes{% endblock %}
+{% block encabezado %}Docentes{% endblock %}
+{% block acciones %}<a class="btn btn-primary" href="{% url 'academics:docente_nuevo' %}">{% icono "mas" %} Nuevo docente</a>{% endblock %}
+{% block contenido %}
+<div class="card table-wrap">
+  <table class="table">
+    <thead><tr><th>Docente</th><th>Correo</th><th class="num">Secciones {% if periodo %}({{ periodo.nombre }}){% endif %}</th><th>Estado</th><th></th></tr></thead>
+    <tbody>{% for d in docentes %}
+      <tr><td><strong>{{ d.nombre }} {{ d.apellido }}</strong></td><td>{{ d.correo }}</td><td class="num">{{ d.n_secciones }}</td>
+        <td>{% if d.activo %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge">Inactivo</span>{% endif %}</td>
+        <td class="acciones"><a class="btn btn-secondary btn-sm" href="{% url 'academics:docente_editar' d.pk %}">{% icono "editar" %} Editar</a></td></tr>
+    {% empty %}<tr><td colspan="5" class="empty">No hay docentes registrados.</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

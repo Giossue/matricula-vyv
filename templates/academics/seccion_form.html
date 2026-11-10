@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% load ui static %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block encabezado %}{{ titulo }}{% endblock %}
+{% block acciones %}<a class="btn btn-secondary" href="{% url 'academics:secciones' %}">{% icono "volver" %} Volver</a>{% endblock %}
+{% block contenido %}
+<form method="post" data-validar class="stack" style="max-width:900px">
+  {% csrf_token %}
+  <section class="card">
+    <div class="card-header"><div><h2>Datos de la sección</h2><p>Docente, paralelo y capacidad máxima.</p></div>
+      {% if objeto.pk %}<span class="badge badge-info">{{ inscritos }} estudiante(s) inscrito(s)</span>{% endif %}</div>
+    <div class="card-body">
+      {% if form.non_field_errors %}<div class="alert alert-error" style="margin-bottom:1rem">{% icono "x" %}<div>{{ form.non_field_errors }}</div></div>{% endif %}
+      <div class="form-grid">{% for campo in form %}{% include "includes/campo.html" %}{% endfor %}</div>
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-header"><div><h2>Horario semanal</h2><p>Bloques de clase. No pueden superponerse dentro de la misma sección.</p></div>
+      <button type="button" class="btn btn-secondary btn-sm" data-agregar-horario>{% icono "mas" %} Agregar bloque</button></div>
+    <div class="card-body">
+      {{ formset.management_form }}
+      {% if formset.non_form_errors %}<div class="alert alert-error" style="margin-bottom:1rem">{% icono "x" %}<div>{{ formset.non_form_errors }}</div></div>{% endif %}
+      <div data-horarios>
+        {% for f in formset %}
+        <div class="form-grid horario-fila" style="grid-template-columns:repeat(4,minmax(0,1fr));align-items:end">
+          {{ f.id }}
+          {% include "includes/campo.html" with campo=f.dia_semana %}
+          {% include "includes/campo.html" with campo=f.hora_inicio %}
+          {% include "includes/campo.html" with campo=f.hora_fin %}
+          <div class="field">{% if f.instance.pk %}<label><input type="checkbox" name="{{ f.DELETE.html_name }}" class="checkbox"> Eliminar bloque</label>{% endif %}</div>
+          {% if f.non_field_errors %}<div style="grid-column:1/-1">{{ f.non_field_errors }}</div>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <template data-plantilla-horario>
+        <div class="form-grid horario-fila" style="grid-template-columns:repeat(4,minmax(0,1fr));align-items:end">
+          {{ formset.empty_form.id }}
+          {% include "includes/campo.html" with campo=formset.empty_form.dia_semana %}
+          {% include "includes/campo.html" with campo=formset.empty_form.hora_inicio %}
+          {% include "includes/campo.html" with campo=formset.empty_form.hora_fin %}
+          <div class="field"></div>
+        </div>
+      </template>
+    </div>
+  </section>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="{% url 'academics:secciones' %}">Cancelar</a>
+    <button class="btn btn-primary" type="submit">Guardar sección</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/seccion_form.js' %}"></script>{% endblock %}

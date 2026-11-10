@@ -1,0 +1,36 @@
+{% load static ui %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Inicio{% endblock %} · CampusFlow</title>
+  <link rel="stylesheet" href="{% static 'css/campusflow.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% include "includes/iconos.html" %}
+{% if user.is_authenticated %}
+<div class="app">
+  {% include "includes/sidebar.html" %}
+  <div class="app-main">
+    <header class="topbar">
+      <button class="btn-icon menu-toggle" type="button" data-menu-toggle aria-label="Abrir menú">{% icono "menu" %}</button>
+      <div class="topbar-title">
+        <span class="topbar-kicker">{% block kicker %}{% if user.es_administrador %}Administración académica{% else %}Portal del estudiante{% endif %}{% endblock %}</span>
+        <h1>{% block encabezado %}{% endblock %}</h1>
+      </div>
+      <div class="topbar-actions">{% block acciones %}{% endblock %}</div>
+    </header>
+    <main class="content" id="contenido">
+      {% include "includes/mensajes.html" %}
+      {% block contenido %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% else %}
+  {% block publico %}{% endblock %}
+{% endif %}
+<script src="{% static 'js/app.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

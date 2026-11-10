@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}No encontrado{% endblock %}
+{% block encabezado %}Página no encontrada{% endblock %}
+{% block contenido %}
+<div class="alert alert-warning">{% icono "alerta" %}<div><strong>El recurso no existe o no te pertenece (HTTP 404).</strong>
+<a class="btn btn-secondary btn-sm" href="{% url 'inicio' %}">{% icono "volver" %} Volver a mi panel</a></div></div>
+{% endblock %}
+{% block publico %}<div class="content"><div class="alert alert-warning">{% icono "alerta" %}<div><strong>Página no encontrada.</strong> <a href="{% url 'accounts:login' %}">Iniciar sesión</a></div></div></div>{% endblock %}

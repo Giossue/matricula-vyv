@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Asignaturas{% endblock %}
+{% block encabezado %}Asignaturas{% endblock %}
+{% block acciones %}<a class="btn btn-primary" href="{% url 'academics:asignatura_nueva' %}">{% icono "mas" %} Nueva asignatura</a>{% endblock %}
+{% block contenido %}
+<form class="toolbar" method="get">
+  <div class="field"><label for="q">Buscar</label><input type="search" id="q" name="q" value="{{ q }}" placeholder="Nombre o código"></div>
+  <div class="field"><label for="carrera">Carrera</label><select id="carrera" name="carrera"><option value="">Todas</option>{% for c in carreras %}<option value="{{ c.pk }}" {% if carrera_sel == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="estado">Estado</label><select id="estado" name="estado"><option value="">Todos</option>{% for v, t in estados %}<option value="{{ v }}" {% if estado_sel == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+  <button class="btn btn-secondary" type="submit">{% icono "buscar" %} Filtrar</button>
+</form>
+<div class="card table-wrap">
+  <table class="table">
+    <thead><tr><th>Código</th><th>Asignatura</th><th>Carrera</th><th class="num">Créditos</th><th class="num">Semestre</th><th class="num">Secciones</th><th>Estado</th><th></th></tr></thead>
+    <tbody>{% for a in asignaturas %}
+      <tr>
+        <td class="mono">{{ a.codigo }}</td><td><strong>{{ a.nombre }}</strong></td><td>{{ a.carrera.nombre }}</td>
+        <td class="num">{{ a.creditos }}</td><td class="num">{{ a.semestre_recomendado }}</td><td class="num">{{ a.n_secciones }}</td>
+        <td>{% if a.activa %}<span class="badge badge-success">Activa</span>{% else %}<span class="badge">Inactiva</span>{% endif %}</td>
+        <td class="acciones">
+          <a class="btn btn-secondary btn-sm" href="{% url 'academics:asignatura_editar' a.pk %}">{% icono "editar" %} Editar</a>
+          <form method="post" action="{% url 'academics:asignatura_estado' a.pk %}" data-confirmar="{% if a.activa %}¿Desactivar «{{ a.nombre }}»? Dejará de aparecer en la oferta de matrícula.{% else %}¿Activar «{{ a.nombre }}»?{% endif %}">{% csrf_token %}
+            <button class="btn btn-sm {% if a.activa %}btn-danger{% else %}btn-secondary{% endif %}" type="submit">{% if a.activa %}Desactivar{% else %}Activar{% endif %}</button>
+          </form>
+        </td>
+      </tr>
+    {% empty %}<tr><td colspan="8" class="empty">No hay asignaturas que coincidan con la búsqueda.</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Disponibilidad de cupos{% endblock %}
+{% block encabezado %}Disponibilidad de cupos{% endblock %}
+{% block contenido %}
+{% include "includes/filtro_periodo.html" %}
+<p class="nota-metodo">Los cupos se calculan en cada consulta contando los detalles de matrícula en estado «inscrita». Un retiro libera el cupo inmediatamente. Total: {{ ocupados }} ocupados de {{ capacidad }}.</p>
+<div class="card table-wrap" style="margin-top:1rem">
+  <table class="table">
+    <thead><tr><th>Carrera</th><th>Asignatura</th><th>Paralelo</th><th>Docente</th><th class="num">Capacidad</th><th class="num">Inscritos</th><th class="num">Disponibles</th><th>Ocupación</th></tr></thead>
+    <tbody>{% for s in secciones %}
+      <tr><td>{{ s.asignatura.carrera.codigo }}</td><td>{{ s.asignatura.nombre }}</td><td>{{ s.paralelo }}</td><td>{{ s.docente }}</td>
+        <td class="num">{{ s.capacidad_maxima }}</td><td class="num">{{ s.cupos_ocupados }}</td>
+        <td class="num">{% if s.cupos_disponibles == 0 %}<span class="badge badge-danger">Sin cupos</span>{% else %}{{ s.cupos_disponibles }}{% endif %}</td>
+        <td><div class="ocupacion"><div class="barra {{ s|nivel_ocupacion }}"><i style="width:{{ s.porcentaje_ocupacion }}%"></i></div><span>{{ s.porcentaje_ocupacion }}%</span></div></td></tr>
+    {% empty %}<tr><td colspan="8" class="empty">No hay secciones en este período.</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

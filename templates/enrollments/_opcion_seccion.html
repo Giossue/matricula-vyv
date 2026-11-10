@@ -1,0 +1,23 @@
+{% load ui %}
+{% with error=errores_seccion|clave:s.pk %}
+<li>
+  <label class="sec-option {% if s.pk in seleccion %}is-selected{% endif %} {% if error %}has-error{% endif %} {% if s.bloqueada and not omitir_validacion %}is-disabled{% endif %}"
+         data-opcion data-seccion="{{ s.pk }}" data-asignatura="{{ s.asignatura_id }}">
+    <input type="checkbox" name="secciones" value="{{ s.pk }}" {% if s.pk in seleccion %}checked{% endif %}
+           {% if s.bloqueada and not omitir_validacion %}disabled{% endif %}
+           aria-label="{{ s.asignatura.nombre }} paralelo {{ s.paralelo }}">
+    <span class="sec-info">
+      <strong>Paralelo {{ s.paralelo }} · {{ s.docente }}</strong>
+      <span>{% icono "reloj" %} {{ s.horario_texto }}</span>
+    </span>
+    <span class="sec-side">
+      {% if s.ya_inscrita %}<span class="badge badge-info">Ya matriculada</span>
+      {% elif s.cupos_disponibles == 0 %}<span class="badge badge-danger">Sin cupos</span>
+      {% else %}<span class="badge badge-success">{{ s.cupos_disponibles }} cupo{{ s.cupos_disponibles|pluralize }}</span>{% endif %}
+      <br><small>{{ s.cupos_ocupados }}/{{ s.capacidad_maxima }} ocupados</small>
+    </span>
+    {% if error %}<span class="sec-msg">{% icono "alerta" %} {{ error }}</span>{% endif %}
+    <span class="sec-msg" data-aviso hidden></span>
+  </label>
+</li>
+{% endwith %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Matrículas{% endblock %}
+{% block encabezado %}Matrículas registradas{% endblock %}
+{% block contenido %}
+<form class="toolbar" method="get">
+  <div class="field"><label for="periodo">Período</label><select id="periodo" name="periodo">{% for p in periodos %}<option value="{{ p.pk }}" {% if periodo and p.pk == periodo.pk %}selected{% endif %}>{{ p.nombre }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="q">Estudiante</label><input type="search" id="q" name="q" value="{{ q }}" placeholder="Nombre o código"></div>
+  <button class="btn btn-secondary" type="submit">{% icono "buscar" %} Filtrar</button>
+</form>
+<div class="card table-wrap">
+  <table class="table">
+    <thead><tr><th>Código</th><th>Estudiante</th><th>Carrera</th><th>Registro</th><th class="num">Vigentes</th><th class="num">Retiradas</th><th class="num">Créditos</th><th>Estado</th><th></th></tr></thead>
+    <tbody>{% for m in matriculas %}
+      <tr><td class="mono">{{ m.codigo }}</td><td>{{ m.estudiante.usuario.nombre_completo }}<br><small class="mono">{{ m.estudiante.codigo_estudiantil }}</small></td><td>{{ m.estudiante.carrera.codigo }}</td>
+        <td>{{ m.fecha_registro|date:"d/m/Y H:i" }}</td><td class="num">{{ m.n_vigentes }}</td><td class="num">{{ m.n_retiradas }}</td><td class="num">{{ m.creditos|default:0 }}</td>
+        <td>{% if m.estado == "activa" %}<span class="badge badge-success">Activa</span>{% else %}<span class="badge">{{ m.get_estado_display }}</span>{% endif %}</td>
+        <td class="acciones"><a class="btn btn-secondary btn-sm" href="{% url 'matriculas_admin:admin_matricula_detalle' m.pk %}">{% icono "ojo" %} Ver</a></td></tr>
+    {% empty %}<tr><td colspan="9" class="empty">No hay matrículas en este período.</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

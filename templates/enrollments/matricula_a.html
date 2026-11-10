@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% load ui static %}
+{% block titulo %}Matricularme{% endblock %}
+{% block encabezado %}Matricularme{% endblock %}
+{% block contenido %}
+{% include "includes/barra_demo.html" %}
+{% include "enrollments/_estado_periodo.html" %}
+{% include "enrollments/_incidencias.html" %}
+
+{% if vigentes %}
+<section class="card" style="margin-bottom:1.25rem">
+  <div class="card-header"><div><h2>Asignaturas ya matriculadas</h2><p>{{ vigentes|length }} asignatura(s) · {{ creditos_vigentes }} créditos</p></div></div>
+  <div class="table-wrap"><table class="table"><tbody>
+    {% for d in vigentes %}<tr><td><strong>{{ d.seccion.asignatura.nombre }}</strong></td><td>Paralelo {{ d.seccion.paralelo }}</td><td>{{ d.seccion.horario_texto }}</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endif %}
+
+{% if matricula_abierta %}
+<form method="post" action="{% url 'enrollments:confirmar' %}" class="card" data-form-matricula data-version="A" {% if omitir_validacion %}novalidate data-sin-validacion{% endif %}>
+  {% csrf_token %}
+  <div class="card-header"><div><h2>Oferta de {{ periodo.nombre }}</h2><p>Marca un paralelo por asignatura y confirma.</p></div></div>
+  {% for g in grupos %}
+  <div class="asig-group">
+    <div class="asig-head"><h3>{{ g.asignatura.nombre }}</h3><span class="meta mono">{{ g.asignatura.codigo }}</span><span class="meta">{{ g.asignatura.creditos }} créditos · semestre {{ g.asignatura.semestre_recomendado }} · {{ g.asignatura.carrera.nombre }}</span></div>
+    <ul class="secciones-list">{% for s in g.secciones %}{% include "enrollments/_opcion_seccion.html" %}{% endfor %}</ul>
+  </div>
+  {% empty %}<div class="empty">No hay asignaturas ofertadas en este período.</div>
+  {% endfor %}
+  <div class="card-body" style="border-top:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+    <span class="muted" data-contador>0 asignaturas seleccionadas</span>
+    <span class="sec-msg" data-error-envio hidden></span>
+    <button class="btn btn-primary btn-lg" type="submit">Confirmar matrícula</button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/matricula.js' %}"></script>{% endblock %}

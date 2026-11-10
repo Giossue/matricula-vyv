@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Laboratorio de Calidad — VyV{% endblock %}
+{% block kicker %}Calidad del software{% endblock %}
+{% block encabezado %}Laboratorio de Calidad — VyV{% endblock %}
+{% block contenido %}
+<p class="definicion">Dos preguntas distintas sobre el mismo sistema. La <strong>verificación</strong> se responde con evidencia técnica que el sistema puede producir por sí mismo. La <strong>validación</strong> solo se responde preguntando a las personas que lo usan.</p>
+<div class="lab-cards">
+  <section class="card lab-card">
+    <span class="kicker">A · Verificación</span>
+    <span class="pregunta">¿Estamos construyendo correctamente el producto?</span>
+    <p class="muted" style="margin:0">Comprueba que lo implementado cumple los requisitos y las reglas definidas.</p>
+    <ul>
+      <li>Casos V01–V09 ejecutados con el test runner de Django.</li>
+      <li>Base de datos de pruebas aislada (SQLite en memoria).</li>
+      <li>Resultado obtenido en la ejecución real, no escrito a mano.</li>
+    </ul>
+    {% if reporte %}<p style="margin:0"><span class="badge {% if reporte.fallidas %}badge-danger{% else %}badge-success{% endif %}">Última ejecución: {{ reporte.aprobadas }}/{{ reporte.total }} aprobadas</span></p>
+    {% else %}<p style="margin:0"><span class="badge">Aún no se han ejecutado las pruebas</span></p>{% endif %}
+    <a class="btn btn-primary" href="{% url 'quality_lab:verificacion' %}">Abrir verificación {% icono "flecha" %}</a>
+  </section>
+  <section class="card lab-card validacion">
+    <span class="kicker">B · Validación</span>
+    <span class="pregunta">¿Estamos construyendo el producto correcto?</span>
+    <p class="muted" style="margin:0">Determina si el sistema resuelve las necesidades reales de los estudiantes.</p>
+    <ul>
+      <li>Versión A: funciona, pero no permite planificar la semana antes de confirmar.</li>
+      <li>Versión B: agrega vista semanal, avisos de cruce y resumen.</li>
+      <li>Opiniones de participantes guardadas en la base de datos.</li>
+    </ul>
+    <p style="margin:0"><span class="badge badge-info">Experiencia activa: Versión {{ version }}</span> <span class="badge">{{ n_evaluaciones }} evaluación{{ n_evaluaciones|pluralize:"es" }}</span></p>
+    <a class="btn btn-success" href="{% url 'quality_lab:validacion' %}">Abrir validación {% icono "flecha" %}</a>
+  </section>
+</div>
+{% endblock %}

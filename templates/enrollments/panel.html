@@ -1,0 +1,46 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Inicio{% endblock %}
+{% block encabezado %}Hola, {{ user.nombre }}{% endblock %}
+{% block acciones %}{% if matricula_abierta %}<a class="btn btn-primary" href="{% url 'enrollments:matricula' %}">{% icono "portapapeles" %} Matricularme</a>{% endif %}{% endblock %}
+{% block contenido %}
+<div class="metrics">
+  <div class="card metric"><span>Código estudiantil</span><strong class="mono" style="font-size:1.25rem">{{ estudiante.codigo_estudiantil }}</strong><small>{{ estudiante.carrera.nombre }}</small></div>
+  <div class="card metric"><span>Semestre actual</span><strong>{{ estudiante.semestre_actual }}</strong><small>{{ estudiante.carrera.codigo }}</small></div>
+  <div class="card metric"><span>Asignaturas matriculadas</span><strong>{{ vigentes|length }}</strong><small>{{ creditos }} créditos en el período</small></div>
+  <div class="card metric"><span>Plazo de matrícula</span>
+    {% if periodo and matricula_abierta %}<strong>{{ dias_restantes }} día{{ dias_restantes|pluralize }}</strong><small>hasta el {{ periodo.fecha_limite_matricula|date:"d/m/Y" }}</small>
+    {% else %}<strong style="font-size:1.1rem;color:var(--red-700)">Cerrado</strong><small>{{ problema_periodo.mensaje }}</small>{% endif %}</div>
+</div>
+<div class="grid grid-2">
+  <section class="card">
+    <div class="card-header"><div><h2>Información académica</h2><p>Datos registrados en el sistema.</p></div></div>
+    <div class="card-body">
+      <dl class="dl-inline" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+        <div><dt>Nombre</dt><dd>{{ user.nombre_completo }}</dd></div>
+        <div><dt>Correo</dt><dd>{{ user.correo }}</dd></div>
+        <div><dt>Carrera</dt><dd>{{ estudiante.carrera.nombre }}</dd></div>
+        <div><dt>Período activo</dt><dd>{{ periodo.nombre|default:"Ninguno" }}</dd></div>
+        <div><dt>Estado de matrícula</dt><dd>{% if matricula %}{{ matricula.get_estado_display }}{% else %}Sin matrícula en el período{% endif %}</dd></div>
+        <div><dt>Retiros permitidos hasta</dt><dd>{% if periodo %}{{ periodo.fecha_limite_matricula|date:"d/m/Y" }}{% else %}—{% endif %}</dd></div>
+      </dl>
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-header"><div><h2>Mis asignaturas del período</h2><p>{{ periodo.nombre|default:"" }}</p></div><a class="btn btn-secondary btn-sm" href="{% url 'enrollments:mis_asignaturas' %}">Ver detalle</a></div>
+    <div class="table-wrap"><table class="table"><tbody>
+      {% for d in vigentes %}<tr><td><strong>{{ d.seccion.asignatura.nombre }}</strong><br><small>Paralelo {{ d.seccion.paralelo }} · {{ d.seccion.docente }}</small></td><td>{{ d.seccion.horario_texto }}</td></tr>
+      {% empty %}<tr><td class="empty">Todavía no tienes asignaturas matriculadas en este período.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+<section class="card" style="margin-top:1.25rem">
+  <div class="card-header"><div><h2>Cómo funciona la matrícula</h2><p>Reglas que aplica el sistema.</p></div></div>
+  <div class="card-body"><ul style="margin:0;padding-left:1.1rem;display:grid;gap:.35rem">
+    <li>Puedes matricular un solo paralelo por asignatura en el período.</li>
+    <li>Solo se aceptan paralelos con cupos disponibles; los cupos se calculan con las matrículas registradas.</li>
+    <li>No puedes elegir asignaturas cuyos horarios se crucen.</li>
+    <li>La matrícula se guarda completa o no se guarda: si algo falla, no se registra nada.</li>
+    <li>Puedes retirar asignaturas hasta la fecha límite; el cupo queda libre para otros estudiantes.</li>
+  </ul></div>
+</section>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block encabezado %}{{ titulo }}{% endblock %}
+{% block acciones %}<a class="btn btn-secondary" href="{% url volver %}">{% icono "volver" %} Volver</a>{% endblock %}
+{% block contenido %}
+<div class="card" style="max-width:820px">
+  <form method="post" class="card-body" data-validar>
+    {% csrf_token %}
+    {% if ayuda %}<div class="alert alert-info" style="margin-bottom:1.25rem">{% icono "info" %}<p>{{ ayuda }}</p></div>{% endif %}
+    {% if form.non_field_errors %}<div class="alert alert-error" style="margin-bottom:1rem">{% icono "x" %}<div>{{ form.non_field_errors }}</div></div>{% endif %}
+    <div class="form-grid">
+      {% for campo in form %}{% include "includes/campo.html" %}{% endfor %}
+    </div>
+    <div class="form-actions">
+      <a class="btn btn-secondary" href="{% url volver %}">Cancelar</a>
+      <button class="btn btn-primary" type="submit">Guardar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

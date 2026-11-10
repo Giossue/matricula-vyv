@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Panel administrativo{% endblock %}
+{% block encabezado %}Panel administrativo{% endblock %}
+{% block acciones %}<a class="btn btn-primary" href="{% url 'academics:seccion_nueva' %}">{% icono "mas" %} Nueva sección</a>{% endblock %}
+{% block contenido %}
+{% if periodo %}
+<div class="alert alert-info" style="margin-bottom:1.25rem">{% icono "calendario" %}
+  <div><strong>Período activo: {{ periodo.nombre }}</strong>
+  Del {{ periodo.fecha_inicio|date:"d/m/Y" }} al {{ periodo.fecha_fin|date:"d/m/Y" }} · matrícula y retiros hasta el {{ periodo.fecha_limite_matricula|date:"d/m/Y" }}
+  {% if periodo.matricula_abierta %}<span class="badge badge-success">Matrícula abierta</span>{% else %}<span class="badge badge-danger">Matrícula cerrada</span>{% endif %}</div>
+</div>
+{% else %}
+<div class="alert alert-warning" style="margin-bottom:1.25rem">{% icono "alerta" %}<div><strong>No hay un período activo.</strong> Los estudiantes no pueden matricularse. <a href="{% url 'academics:periodos' %}">Gestionar períodos</a></div></div>
+{% endif %}
+<div class="metrics">
+  <div class="card metric"><span>Estudiantes</span><strong>{{ total_estudiantes }}</strong><small>registrados</small></div>
+  <div class="card metric"><span>Asignaturas activas</span><strong>{{ total_asignaturas }}</strong><small>en el catálogo</small></div>
+  <div class="card metric"><span>Matrículas activas</span><strong>{{ total_matriculas }}</strong><small>en el período</small></div>
+  <div class="card metric"><span>Ocupación</span><strong>{{ ocupacion_pct }}%</strong><small>{{ ocupados_total }} de {{ capacidad_total }} cupos · {{ secciones_llenas }} sección(es) llenas</small></div>
+</div>
+<div class="grid grid-2">
+  <section class="card">
+    <div class="card-header"><div><h2>Secciones con menos cupos</h2><p>Calculado desde las inscripciones registradas.</p></div><a class="btn btn-secondary btn-sm" href="{% url 'academics:cupos' %}">Ver todas</a></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Sección</th><th>Ocupación</th></tr></thead>
+      <tbody>{% for s in criticas %}
+        <tr><td>{{ s.asignatura.nombre }}<br><small>Paralelo {{ s.paralelo }} · {{ s.docente }}</small></td>
+          <td><div class="ocupacion"><div class="barra {{ s|nivel_ocupacion }}"><i style="width:{{ s.porcentaje_ocupacion }}%"></i></div><span>{{ s.cupos_ocupados }}/{{ s.capacidad_maxima }}</span></div></td></tr>
+      {% empty %}<tr><td colspan="2" class="empty">Sin secciones en el período.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  <section class="card">
+    <div class="card-header"><div><h2>Últimas inscripciones</h2><p>Registros más recientes del período.</p></div><a class="btn btn-secondary btn-sm" href="{% url 'matriculas_admin:admin_matriculas' %}">Ver matrículas</a></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Estudiante</th><th>Asignatura</th><th>Estado</th></tr></thead>
+      <tbody>{% for d in ultimas %}
+        <tr><td>{{ d.matricula.estudiante.usuario.nombre_completo }}<br><small>{{ d.fecha_registro|date:"d/m/Y H:i" }}</small></td><td>{{ d.seccion.asignatura.nombre }} <small>({{ d.seccion.paralelo }})</small></td>
+          <td>{% if d.estado == "inscrita" %}<span class="badge badge-success">Inscrita</span>{% else %}<span class="badge">Retirada</span>{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="3" class="empty">Todavía no hay inscripciones.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+</div>
+<section class="card" style="margin-top:1.25rem">
+  <div class="card-body" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+    <span class="brand-mark" style="background:var(--navy-800)">{% icono "matraz" %}</span>
+    <div style="flex:1;min-width:240px"><h2>Laboratorio de Calidad — VyV</h2><p class="muted" style="margin:0">Ejecuta las pruebas automatizadas (verificación) y revisa la evaluación con usuarios (validación).</p></div>
+    <a class="btn btn-primary" href="{% url 'quality_lab:laboratorio' %}">Abrir laboratorio {% icono "flecha" %}</a>
+  </div>
+</section>
+{% endblock %}

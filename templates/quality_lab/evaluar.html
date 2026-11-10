@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Evaluar la experiencia{% endblock %}
+{% block kicker %}Validación con usuarios{% endblock %}
+{% block encabezado %}Evaluar la experiencia de matrícula{% endblock %}
+{% block contenido %}
+<div class="card" style="max-width:760px">
+  <form method="post" class="card-body" data-validar>
+    {% csrf_token %}
+    <p class="muted">Tu respuesta es una opinión personal. Se guarda para que el equipo la analice; no hay respuestas correctas o incorrectas.</p>
+    {% if form.non_field_errors %}<div class="alert alert-error">{% icono "x" %}<div>{{ form.non_field_errors }}</div></div>{% endif %}
+    {% for campo in form %}
+      <div class="field {% if campo.errors %}has-error{% endif %}">
+        <label class="label" {% if campo.id_for_label %}for="{{ campo.id_for_label }}"{% endif %}>{{ campo.label }}</label>
+        {% if campo.name == "participante" or campo.name == "mejoras" %}{{ campo }}{% else %}<div class="radio-row">{{ campo }}</div>{% endif %}
+        {% if campo.help_text %}<span class="help">{{ campo.help_text }}</span>{% endif %}
+        {{ campo.errors }}
+      </div>
+    {% endfor %}
+    <div class="form-actions"><a href="{% url 'inicio' %}" class="btn btn-secondary">Cancelar</a><button class="btn btn-primary" type="submit">Enviar evaluación</button></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Períodos académicos{% endblock %}
+{% block encabezado %}Períodos académicos{% endblock %}
+{% block acciones %}<a class="btn btn-primary" href="{% url 'academics:periodo_nuevo' %}">{% icono "mas" %} Nuevo período</a>{% endblock %}
+{% block contenido %}
+<div class="card table-wrap">
+  <table class="table">
+    <thead><tr><th>Período</th><th>Inicio</th><th>Fin</th><th>Límite de matrícula y retiros</th><th>Estado</th><th class="num">Secciones</th><th class="num">Matrículas</th><th></th></tr></thead>
+    <tbody>{% for p in periodos %}
+      <tr><td><strong>{{ p.nombre }}</strong></td><td>{{ p.fecha_inicio|date:"d/m/Y" }}</td><td>{{ p.fecha_fin|date:"d/m/Y" }}</td><td>{{ p.fecha_limite_matricula|date:"d/m/Y" }}</td>
+        <td>{% if p.estado == "activo" %}<span class="badge badge-success">Activo</span>{% if not p.matricula_abierta %} <span class="badge badge-danger">Plazo vencido</span>{% endif %}{% elif p.estado == "cerrado" %}<span class="badge">Cerrado</span>{% else %}<span class="badge badge-info">Planificado</span>{% endif %}</td>
+        <td class="num">{{ p.n_secciones }}</td><td class="num">{{ p.n_matriculas }}</td>
+        <td class="acciones"><a class="btn btn-secondary btn-sm" href="{% url 'academics:periodo_editar' p.pk %}">{% icono "editar" %} Editar</a></td></tr>
+    {% empty %}<tr><td colspan="8" class="empty">No hay períodos registrados.</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

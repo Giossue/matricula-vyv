@@ -1,0 +1,78 @@
+{% extends "base.html" %}{% load ui static %}
+{% block titulo %}Matricularme{% endblock %}
+{% block encabezado %}Matricularme{% endblock %}
+{% block contenido %}
+{% include "includes/barra_demo.html" %}
+{% include "enrollments/_estado_periodo.html" %}
+{% include "enrollments/_incidencias.html" %}
+
+{% if matricula_abierta %}
+<div class="pasos" aria-label="Pasos de la matrícula">
+  <span class="paso on"><b>1</b> Elige tus paralelos</span>
+  <span class="paso on"><b>2</b> Revisa tu semana</span>
+  <span class="paso" data-paso-3><b>3</b> Confirma</span>
+</div>
+<form method="post" action="{% url 'enrollments:confirmar' %}" data-form-matricula data-version="B"
+      data-url-validar="{% url 'enrollments:validar' %}" {% if omitir_validacion %}novalidate data-sin-validacion{% endif %}>
+  {% csrf_token %}
+  <div class="grid grid-main">
+    <div class="stack">
+      <section class="card">
+        <div class="card-header">
+          <div><h2>Tu semana</h2><p>Lo que ya tienes matriculado y lo que vas seleccionando. Los cruces aparecen en rojo.</p></div>
+        </div>
+        <div class="card-body">
+          <div class="calendario" data-calendario></div>
+          <div class="cal-leyenda">
+            <span><i style="background:#e7ebf2;border-left:3px solid var(--navy-700)"></i>Ya matriculada</span>
+            <span><i style="background:var(--blue-100);border-left:3px solid var(--blue-600)"></i>Seleccionada</span>
+            <span><i style="background:var(--red-100);border-left:3px solid var(--red-600)"></i>Cruce de horario</span>
+          </div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-header"><div><h2>Oferta de {{ periodo.nombre }}</h2><p>Elige un paralelo por asignatura. Verás al instante si se cruza con tu horario.</p></div></div>
+        {% for g in grupos %}
+        <div class="asig-group">
+          <div class="asig-head"><h3>{{ g.asignatura.nombre }}</h3><span class="meta mono">{{ g.asignatura.codigo }}</span><span class="meta">{{ g.asignatura.creditos }} créditos · semestre {{ g.asignatura.semestre_recomendado }} · {{ g.asignatura.carrera.nombre }}</span></div>
+          <ul class="secciones-list">{% for s in g.secciones %}{% include "enrollments/_opcion_seccion.html" %}{% endfor %}</ul>
+        </div>
+        {% empty %}<div class="empty">No hay asignaturas ofertadas en este período.</div>{% endfor %}
+      </section>
+    </div>
+
+    <aside class="card resumen" aria-live="polite">
+      <div class="card-header"><div><h2>Resumen de tu selección</h2><p>Revisa antes de confirmar.</p></div></div>
+      <div class="card-body">
+        <ul class="resumen-lista" data-resumen><li class="muted">Aún no has seleccionado asignaturas.</li></ul>
+        <div data-avisos style="margin-top:.75rem"></div>
+        <div class="resumen-total"><span>Créditos nuevos</span><span data-creditos>0</span></div>
+        <div class="resumen-total" style="border-top:0;margin-top:0;padding-top:0;font-weight:500"><span>Total con lo ya matriculado</span><span data-creditos-total>{{ creditos_vigentes }}</span></div>
+        <span class="sec-msg" data-error-envio hidden style="margin-bottom:.75rem"></span>
+        <button class="btn btn-primary btn-lg" type="button" data-abrir-revision>Revisar y confirmar</button>
+        <p class="muted" style="font-size:.8rem;margin:.6rem 0 0">Nada se guarda hasta que confirmes en el siguiente paso.</p>
+      </div>
+    </aside>
+  </div>
+
+  <dialog class="modal" data-dialogo-revision aria-labelledby="titulo-revision">
+    <div class="modal-body">
+      <h2 id="titulo-revision">Confirma tu matrícula</h2>
+      <p class="muted">Período {{ periodo.nombre }} · {{ estudiante.usuario.nombre_completo }} ({{ estudiante.codigo_estudiantil }})</p>
+      <ul class="resumen-lista" data-revision-lista></ul>
+      <div data-revision-servidor style="margin-top:1rem"></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-secondary" data-cerrar-revision>Seguir editando</button>
+      <button type="submit" class="btn btn-success" data-confirmar-final>Confirmar matrícula</button>
+    </div>
+  </dialog>
+</form>
+{% endif %}
+{{ datos_oferta|json_script:"datos-oferta" }}
+{{ datos_vigentes|json_script:"datos-vigentes" }}
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/calendario.js' %}"></script>
+<script src="{% static 'js/matricula.js' %}"></script>
+{% endblock %}

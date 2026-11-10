@@ -1,0 +1,23 @@
+{% load ui %}
+{% if MODO_DEMO %}
+<section class="demo-bar" aria-label="Controles de la demostración">
+  <div class="demo-bar-label">
+    {% icono "matraz" %}
+    <div><strong>Demostración VyV</strong><small>Estos controles existen solo para la exposición.</small></div>
+  </div>
+  <form method="post" action="{% url 'demo:demo_version' %}" class="segmented" aria-label="Versión de la experiencia">
+    {% csrf_token %}<input type="hidden" name="siguiente" value="{{ request.get_full_path }}">
+    <button name="version" value="A" class="{% if version == 'A' %}on{% endif %}" type="submit">Versión A</button>
+    <button name="version" value="B" class="{% if version == 'B' %}on{% endif %}" type="submit">Versión B</button>
+  </form>
+  {% if mostrar_toggle_validacion %}
+  <form method="post" action="{% url 'demo:demo_validacion_cliente' %}">
+    {% csrf_token %}<input type="hidden" name="siguiente" value="{{ request.get_full_path }}">
+    <button type="submit" class="chip {% if omitir_validacion %}chip-warning{% endif %}" title="Permite enviar selecciones inválidas para comprobar que el backend también las rechaza">
+      {% icono "escudo" %} {% if omitir_validacion %}Validación del navegador: desactivada{% else %}Validación del navegador: activa{% endif %}
+    </button>
+  </form>
+  {% endif %}
+  <a class="chip" href="{% url 'evaluar' %}?version={{ version }}">{% icono "mensaje" %} Evaluar esta versión</a>
+</section>
+{% endif %}

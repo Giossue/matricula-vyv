@@ -1,0 +1,9 @@
+{% load ui %}
+{% if incidencias %}
+<div class="alert alert-error" role="alert" style="margin-bottom:1.25rem" data-incidencias>
+  {% icono "x" %}
+  <div><strong>No se registró la matrícula. No se guardó ningún cambio.</strong>
+    <ul>{% for i in incidencias %}<li>{{ i.mensaje }} <span class="badge badge-danger mono">{{ i.regla }}</span></li>{% endfor %}</ul>
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Matrícula {{ matricula.codigo }}{% endblock %}
+{% block encabezado %}Comprobante de matrícula{% endblock %}
+{% block acciones %}
+  <a class="btn btn-secondary" href="{% if vista_admin %}{% url 'matriculas_admin:admin_matriculas' %}?periodo={{ matricula.periodo_id }}{% else %}{% url 'enrollments:mis_asignaturas' %}{% endif %}">{% icono "volver" %} Volver</a>
+  <button class="btn btn-secondary" type="button" onclick="window.print()">{% icono "imprimir" %} Imprimir</button>
+{% endblock %}
+{% block contenido %}
+<section class="card">
+  <div class="card-body">
+    <div class="comprobante-head">
+      <div><span class="kicker">CampusFlow · {{ matricula.periodo.nombre }}</span><h2 style="font-size:1.4rem">{{ matricula.codigo }}</h2></div>
+      <div>{% if matricula.estado == "activa" %}<span class="badge badge-success">{% icono "check" %} Matrícula activa</span>{% else %}<span class="badge">{{ matricula.get_estado_display }}</span>{% endif %}</div>
+    </div>
+    <dl class="dl-inline" style="margin-top:1.25rem">
+      <div><dt>Estudiante</dt><dd>{{ matricula.estudiante.usuario.nombre_completo }}</dd></div>
+      <div><dt>Código</dt><dd class="mono">{{ matricula.estudiante.codigo_estudiantil }}</dd></div>
+      <div><dt>Carrera</dt><dd>{{ matricula.estudiante.carrera.nombre }}</dd></div>
+      <div><dt>Registrada</dt><dd>{{ matricula.fecha_registro|date:"d/m/Y H:i" }}</dd></div>
+    </dl>
+  </div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Asignatura</th><th>Paralelo</th><th>Docente</th><th>Horario</th><th class="num">Créditos</th><th>Estado</th><th>Registro</th></tr></thead>
+    <tbody>{% for d in detalles %}
+      <tr><td><strong>{{ d.seccion.asignatura.nombre }}</strong><br><small class="mono">{{ d.seccion.asignatura.codigo }}</small></td><td>{{ d.seccion.paralelo }}</td><td>{{ d.seccion.docente }}</td>
+        <td>{% for h in d.seccion.horarios.all %}<div>{{ h }}</div>{% endfor %}</td><td class="num">{{ d.seccion.asignatura.creditos }}</td>
+        <td>{% if d.estado == "inscrita" %}<span class="badge badge-success">Inscrita</span>{% else %}<span class="badge">Retirada {{ d.fecha_retiro|date:"d/m/Y" }}</span>{% endif %}</td>
+        <td class="muted">{{ d.fecha_registro|date:"d/m/Y H:i" }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  <div class="card-body" style="border-top:1px solid var(--gray-200);display:flex;justify-content:space-between"><span class="muted">Datos leídos de la base de datos (tablas matriculas y detalles_matricula).</span><strong>{{ creditos }} créditos vigentes</strong></div>
+</section>
+{% endblock %}

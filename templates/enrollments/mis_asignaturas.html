@@ -1,0 +1,40 @@
+{% extends "base.html" %}{% load ui static %}
+{% block titulo %}Mis asignaturas{% endblock %}
+{% block encabezado %}Mis asignaturas{% endblock %}
+{% block acciones %}{% if matricula %}<a class="btn btn-secondary" href="{% url 'enrollments:comprobante' matricula.pk %}">{% icono "imprimir" %} Comprobante</a>{% endif %}{% endblock %}
+{% block contenido %}
+{% if not puede_retirar and periodo %}
+<div class="alert alert-warning" style="margin-bottom:1.25rem">{% icono "alerta" %}<div><strong>El plazo de matrícula y retiros terminó.</strong> Ya no puedes retirar asignaturas en {{ periodo.nombre }}.</div></div>
+{% endif %}
+<section class="card">
+  <div class="card-header"><div><h2>Matriculadas en {{ periodo.nombre|default:"el período" }}</h2><p>{{ vigentes|length }} asignatura{{ vigentes|length|pluralize }} · {{ creditos }} créditos{% if matricula %} · {{ matricula.codigo }}{% endif %}</p></div></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Asignatura</th><th>Paralelo</th><th>Docente</th><th>Horario</th><th class="num">Créditos</th><th></th></tr></thead>
+    <tbody>{% for d in vigentes %}
+      <tr><td><strong>{{ d.seccion.asignatura.nombre }}</strong><br><small class="mono">{{ d.seccion.asignatura.codigo }}</small></td><td>{{ d.seccion.paralelo }}</td><td>{{ d.seccion.docente }}</td>
+        <td>{% for h in d.seccion.horarios.all %}<div>{{ h }}</div>{% endfor %}</td><td class="num">{{ d.seccion.asignatura.creditos }}</td>
+        <td class="acciones">{% if puede_retirar %}
+          <form method="post" action="{% url 'enrollments:retirar' d.pk %}" data-confirmar="¿Retirar {{ d.seccion.asignatura.nombre }} (paralelo {{ d.seccion.paralelo }})? Tu cupo quedará libre y otro estudiante podrá ocuparlo.">{% csrf_token %}
+            <button class="btn btn-danger btn-sm" type="submit">{% icono "retirar" %} Retirar</button></form>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="6" class="empty">No tienes asignaturas matriculadas. <a href="{% url 'enrollments:matricula' %}">Ir a matricularme</a></td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+
+{% if version == "B" and vigentes %}
+<section class="card">
+  <div class="card-header"><div><h2>Horario semanal</h2><p>Vista consolidada de tus clases.</p></div></div>
+  <div class="card-body"><div class="calendario" data-calendario data-solo-vigentes></div></div>
+</section>
+{{ datos_vigentes|json_script:"datos-vigentes" }}
+{% endif %}
+
+{% if retiradas %}
+<section class="card">
+  <div class="card-header"><div><h2>Historial de retiros</h2><p>Se conservan como registro; ya no ocupan cupo.</p></div></div>
+  <div class="table-wrap"><table class="table"><tbody>
+    {% for d in retiradas %}<tr><td>{{ d.seccion.asignatura.nombre }} <small>(paralelo {{ d.seccion.paralelo }})</small></td><td><span class="badge">Retirada</span></td><td class="muted">{{ d.fecha_retiro|date:"d/m/Y H:i" }}</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if version == "B" and vigentes %}<script src="{% static 'js/calendario.js' %}"></script>{% endif %}{% endblock %}

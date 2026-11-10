@@ -1,0 +1,5 @@
+{% load ui %}
+{% if not matricula_abierta %}
+<div class="alert alert-warning" role="alert" style="margin-bottom:1.25rem">{% icono "alerta" %}
+  <div><strong>La matrícula no está habilitada.</strong><p>{{ problema_periodo.mensaje }}</p></div></div>
+{% endif %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Estudiantes{% endblock %}
+{% block encabezado %}Estudiantes registrados{% endblock %}
+{% block contenido %}
+<form class="toolbar" method="get">
+  <div class="field"><label for="q">Buscar</label><input type="search" id="q" name="q" value="{{ q }}" placeholder="Nombre, apellido o código"></div>
+  <div class="field"><label for="carrera">Carrera</label>
+    <select id="carrera" name="carrera"><option value="">Todas</option>{% for c in carreras %}<option value="{{ c.pk }}" {% if carrera_sel == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select></div>
+  <button class="btn btn-secondary" type="submit">{% icono "buscar" %} Filtrar</button>
+</form>
+<div class="card table-wrap">
+  <table class="table">
+    <thead><tr><th>Código</th><th>Estudiante</th><th>Correo</th><th>Carrera</th><th class="num">Semestre</th><th class="num">Asignaturas vigentes</th></tr></thead>
+    <tbody>
+    {% for e in estudiantes %}
+      <tr><td class="mono">{{ e.codigo_estudiantil }}</td><td>{{ e.usuario.nombre_completo }}<br><small>{{ e.usuario.nombre_usuario }}</small></td>
+        <td>{{ e.usuario.correo }}</td><td>{{ e.carrera.nombre }}</td><td class="num">{{ e.semestre_actual }}</td><td class="num">{{ e.asignaturas_vigentes }}</td></tr>
+    {% empty %}<tr><td colspan="6" class="empty">No hay estudiantes que coincidan con la búsqueda.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

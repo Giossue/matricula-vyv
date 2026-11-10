@@ -1,0 +1,57 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Ingresar{% endblock %}
+{% block publico %}
+<div class="login">
+  <section class="login-aside">
+    <div class="brand" style="padding:0">
+      <span class="brand-mark">{% icono "logo" %}</span>
+      <span><strong>CampusFlow</strong><small>Sistema de Matrícula Académica</small></span>
+    </div>
+    <div>
+      <h2>Organiza tu semestre con información clara y reglas transparentes.</h2>
+      <ul>
+        <li>{% icono "check" %} Consulta la oferta, los horarios y los cupos reales de cada paralelo.</li>
+        <li>{% icono "check" %} Matricúlate con validaciones de cupos, duplicados y cruces de horario.</li>
+        <li>{% icono "check" %} Consulta y retira tus asignaturas dentro del plazo del período.</li>
+      </ul>
+    </div>
+    <small style="color:#7089ad">Entorno de demostración local · Universidad ficticia</small>
+  </section>
+  <section class="login-main">
+    <div class="login-card">
+      <h1>Iniciar sesión</h1>
+      <p class="muted">Ingresa con tu usuario institucional.</p>
+      {% if form.non_field_errors %}
+        <div class="alert alert-error" role="alert" style="margin:1rem 0">{% icono "x" %}<div>{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div></div>
+      {% endif %}
+      <form method="post" novalidate data-validar>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="field">
+          <label for="id_username">Usuario</label>
+          <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" required maxlength="50" autocomplete="username" autofocus>
+        </div>
+        <div class="field">
+          <label for="id_password">Contraseña</label>
+          <input type="password" name="password" id="id_password" required autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary btn-lg" type="submit">Ingresar</button>
+      </form>
+      {% if MODO_DEMO %}
+      <div class="demo-credenciales alert alert-info">
+        {% icono "info" %}
+        <div><strong>Cuentas de demostración (solo uso local)</strong>
+          <table>
+            <tr><td><code>admin</code></td><td>Administrador</td></tr>
+            <tr><td><code>ana.torres</code></td><td>Estudiante</td></tr>
+            <tr><td><code>bruno.mena</code></td><td>Estudiante</td></tr>
+            <tr><td><code>carla.rios</code></td><td>Estudiante</td></tr>
+          </table>
+          <small>Las contraseñas están en el README.</small>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

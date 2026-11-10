@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Oferta académica{% endblock %}
+{% block encabezado %}Oferta académica{% endblock %}
+{% block contenido %}
+<form class="toolbar" method="get" role="search">
+  <div class="field"><label for="q">Nombre de la asignatura</label><input type="search" id="q" name="q" value="{{ q }}" placeholder="Ej.: Programación"></div>
+  <div class="field"><label for="carrera">Carrera</label><select id="carrera" name="carrera"><option value="">Todas las carreras</option>{% for c in carreras %}<option value="{{ c.pk }}" {% if carrera_sel == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select></div>
+  <button class="btn btn-secondary" type="submit">{% icono "buscar" %} Filtrar</button>
+  {% if q or carrera_sel %}<a class="btn btn-secondary" href="{% url 'enrollments:oferta' %}">Limpiar</a>{% endif %}
+</form>
+<p class="muted">{{ total_secciones }} paralelo{{ total_secciones|pluralize }} en {{ periodo.nombre|default:"ningún período activo" }}.</p>
+<div class="card table-wrap">
+  <table class="table">
+    <thead><tr><th>Asignatura</th><th>Carrera</th><th>Paralelo</th><th>Docente</th><th>Horario</th><th>Cupos</th></tr></thead>
+    <tbody>
+    {% for g in grupos %}{% for s in g.secciones %}
+      <tr>
+        <td>{% if forloop.first %}<strong>{{ g.asignatura.nombre }}</strong><br><small><span class="mono">{{ g.asignatura.codigo }}</span> · {{ g.asignatura.creditos }} créditos · sem. {{ g.asignatura.semestre_recomendado }}</small>{% endif %}</td>
+        <td>{% if forloop.first %}{{ g.asignatura.carrera.nombre }}{% endif %}</td>
+        <td>{{ s.paralelo }}</td><td>{{ s.docente }}</td>
+        <td>{% for h in s.horarios.all %}<div>{{ h }}</div>{% endfor %}</td>
+        <td>{% if s.cupos_disponibles == 0 %}<span class="badge badge-danger">Sin cupos</span>{% else %}<span class="badge badge-success">{{ s.cupos_disponibles }} disponible{{ s.cupos_disponibles|pluralize }}</span>{% endif %}<br><small>{{ s.cupos_ocupados }}/{{ s.capacidad_maxima }}</small></td>
+      </tr>
+    {% endfor %}{% empty %}<tr><td colspan="6" class="empty">No hay asignaturas que coincidan con el filtro.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

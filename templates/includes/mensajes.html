@@ -1,0 +1,11 @@
+{% load ui %}
+{% if messages %}
+<div class="flash-stack" role="status">
+  {% for m in messages %}
+  <div class="flash flash-{{ m.tags }}">
+    {% if m.tags == "success" %}{% icono "check" %}{% elif m.tags == "error" %}{% icono "x" %}{% elif m.tags == "warning" %}{% icono "alerta" %}{% else %}{% icono "info" %}{% endif %}
+    <span>{{ m }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,18 @@
+# Entorno y dependencias
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Configuración local
+.env
+
+# Base de datos y reportes locales
+db.sqlite3
+db.sqlite3-journal
+var/
+
+# Editores y sistema
+.vscode/
+.idea/
+.DS_Store

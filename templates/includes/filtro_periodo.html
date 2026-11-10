@@ -1,0 +1,7 @@
+{% load ui %}
+<form class="toolbar" method="get">
+  <div class="field"><label for="periodo">Período</label>
+    <select id="periodo" name="periodo">{% for p in periodos %}<option value="{{ p.pk }}" {% if periodo and p.pk == periodo.pk %}selected{% endif %}>{{ p.nombre }}{% if p.estado == "activo" %} (activo){% endif %}</option>{% endfor %}</select></div>
+  {% if con_busqueda %}<div class="field"><label for="q">Buscar</label><input type="search" id="q" name="q" value="{{ q }}" placeholder="Asignatura, código o docente"></div>{% endif %}
+  <button class="btn btn-secondary" type="submit">{% icono "buscar" %} Filtrar</button>
+</form>

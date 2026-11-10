@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% load ui %}
+{% block titulo %}Acceso restringido{% endblock %}
+{% block encabezado %}Acceso restringido{% endblock %}
+{% block contenido %}
+<div class="alert alert-error" role="alert">{% icono "escudo" %}
+  <div><strong>No tienes permiso para ver esta sección (HTTP 403).</strong>
+  <p>{{ mensaje|default:"Tu rol no tiene acceso a esta funcionalidad." }}</p>
+  <a class="btn btn-secondary btn-sm" href="{% url 'inicio' %}">{% icono "volver" %} Volver a mi panel</a></div>
+</div>
+{% endblock %}
+{% block publico %}<div class="content"><div class="alert alert-error">{% icono "escudo" %}<div><strong>Acceso restringido.</strong> <a href="{% url 'accounts:login' %}">Iniciar sesión</a></div></div></div>{% endblock %}
